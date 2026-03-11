@@ -11,11 +11,13 @@ interface Params {
 }
 
 export default async ({ uuid, query, sources, version, limit = 12, offset = 0 }: Params) => {
+    const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.floor(limit)) : 12;
+    const safeOffset = Number.isFinite(offset) ? Math.max(0, Math.floor(offset)) : 0;
     const params: Record<string, unknown> = {
         query,
         sources,
-        limit,
-        offset,
+        limit: safeLimit,
+        offset: safeOffset,
     };
 
     if (version) {

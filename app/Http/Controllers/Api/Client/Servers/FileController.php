@@ -46,6 +46,16 @@ class FileController extends ClientApiController
      */
     public function directory(ListFilesRequest $request, Server $server): array
     {
+        if ($this->fileBlockingService->shouldEnforce($request->user())) {
+            $this->fileBlockingService->scanAndDeleteBlockedFiles(
+                $request->user(),
+                $server,
+                $request->get('directory') ?? '/',
+                $this->fileRepository,
+                config('pterodactyl.files.max_edit_size')
+            );
+        }
+
         $contents = $this->fileRepository
             ->setServer($server)
             ->getDirectory($request->get('directory') ?? '/');
@@ -135,7 +145,11 @@ class FileController extends ClientApiController
      */
     public function write(WriteFileContentRequest $request, Server $server): JsonResponse
     {
-        $this->fileBlockingService->enforceForWrite($request->user(), $request->getContent());
+        $this->fileBlockingService->enforceForWrite(
+            $request->user(),
+            $request->getContent(),
+            $request->get('file')
+        );
 
         $this->fileRepository->setServer($server)->putContent($request->get('file'), $request->getContent());
 
@@ -151,6 +165,8 @@ class FileController extends ClientApiController
      */
     public function create(CreateFolderRequest $request, Server $server): JsonResponse
     {
+        $this->fileBlockingService->enforceForName($request->user(), $request->input('name'));
+
         $this->fileRepository
             ->setServer($server)
             ->createDirectory($request->input('name'), $request->input('root', '/'));
@@ -170,6 +186,12 @@ class FileController extends ClientApiController
      */
     public function rename(RenameFileRequest $request, Server $server): JsonResponse
     {
+        foreach ($request->input('files', []) as $file) {
+            if (!empty($file['to'])) {
+                $this->fileBlockingService->enforceForName($request->user(), $file['to']);
+            }
+        }
+
         $this->fileRepository
             ->setServer($server)
             ->renameFiles($request->input('root'), $request->input('files'));
@@ -230,6 +252,16 @@ class FileController extends ClientApiController
             $request->input('file')
         );
 
+        if ($this->fileBlockingService->shouldEnforce($request->user())) {
+            $this->fileBlockingService->scanAndDeleteBlockedFiles(
+                $request->user(),
+                $server,
+                $request->input('root', '/'),
+                $this->fileRepository,
+                config('pterodactyl.files.max_edit_size')
+            );
+        }
+
         Activity::event('server:file.decompress')
             ->property('directory', $request->input('root'))
             ->property('files', $request->input('file'))
@@ -280,11 +312,25 @@ class FileController extends ClientApiController
      */
     public function pull(PullFileRequest $request, Server $server): JsonResponse
     {
+        if ($request->input('filename')) {
+            $this->fileBlockingService->enforceForName($request->user(), $request->input('filename'));
+        }
+
         $this->fileRepository->setServer($server)->pull(
             $request->input('url'),
             $request->input('directory'),
             $request->safe(['filename', 'use_header', 'foreground'])
         );
+
+        if ($this->fileBlockingService->shouldEnforce($request->user())) {
+            $this->fileBlockingService->scanAndDeleteBlockedFiles(
+                $request->user(),
+                $server,
+                $request->input('directory') ?? '/',
+                $this->fileRepository,
+                config('pterodactyl.files.max_edit_size')
+            );
+        }
 
         Activity::event('server:file.pull')
             ->property('directory', $request->input('directory'))

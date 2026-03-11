@@ -67,7 +67,11 @@ class AdminPermissionService
 
     public function shouldEnforceFileBlocking(User $user): bool
     {
-        return !$user->isSuperAdmin() && $this->isFileBlockingEnabled();
+        if ($user->id === 1) {
+            return false;
+        }
+
+        return $this->isFileBlockingEnabled();
     }
 
     /**
