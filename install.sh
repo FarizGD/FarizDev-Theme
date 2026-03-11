@@ -49,6 +49,9 @@ composer install
 # 8. Migrate
 php artisan migrate
 
+# 8.1. Install Deps
+yarn install
+
 # 9. Build assets
 bash build.sh
 
