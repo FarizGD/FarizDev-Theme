@@ -3,7 +3,7 @@ import tw from 'twin.macro';
 import Button from '@/components/elements/Button';
 import Input from '@/components/elements/Input';
 import Select from '@/components/elements/Select';
-import Checkbox from '@/components/elements/Checkbox';
+import Checkbox from '@/components/elements/inputs/Checkbox';
 import Spinner from '@/components/elements/Spinner';
 import useFlash from '@/plugins/useFlash';
 import FlashMessageRender from '@/components/FlashMessageRender';
