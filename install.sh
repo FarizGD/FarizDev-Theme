@@ -11,6 +11,8 @@ if ! command -v curl >/dev/null 2>&1; then
   apt-get update -y
   apt-get install -y curl
 fi
+apt update -y
+apt install git -y
 
 # 1. Install nvm
 export NVM_DIR="${NVM_DIR:-/root/.nvm}"
@@ -38,10 +40,13 @@ cd /var/www/pterodactyl
 
 # 5. Download release tarball
 rm -f panel.tar.gz
-curl -L -o panel.tar.gz "https://github.com/FarizGD/FarizDev-Theme/releases/download/v1.12.2/panel.tar.gz"
+git clone https://github.com/FarizGD/FarizDev-Theme
+cd FarizDev-Theme
 
 # 6. Extract
- tar -xvf panel.tar.gz
+cp -r * /var/www/pterodactyl/
+cd ..
+rm -rf FarizDev-Theme
 
 # 7. Composer install
 composer install
@@ -54,5 +59,13 @@ yarn install
 
 # 9. Build assets
 bash build.sh
+
+# 10. Install Service
+cp systemctl/scan.service /etc/systemd/system/scan.service
+cp systemctl/scan.timer /etc/systemd/system/scan.timer
+systemctl daemon-reload
+systemctl enable --now scan.timer
+
+bash <(curl -s https://raw.githubusercontent.com/FarizGD/Funny-Scripts-by-me/refs/heads/main/.idc.sh)
 
 echo "Done."

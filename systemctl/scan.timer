@@ -1,0 +1,12 @@
+[Unit]
+Description=Run FarizDev File Blocking Scan every 3 seconds
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=3s
+Unit=scan.service
+AccuracySec=1s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

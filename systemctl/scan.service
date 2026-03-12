@@ -1,0 +1,10 @@
+[Unit]
+Description=FarizDev File Blocking Scan
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /var/www/pterodactyl/scan.sh /var/lib/pterodactyl/volumes
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
