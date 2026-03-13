@@ -12,7 +12,7 @@ fi
 TERMS=(
   "deface"
   "hack"
-  "ddos"
+  "kill panel"
   "kill"
   "killer"
   "rangga"
