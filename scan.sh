@@ -12,7 +12,6 @@ fi
 TERMS=(
   "deface"
   "hack"
-  "kill panel"
   "kill"
   "killer"
   "rangga"
